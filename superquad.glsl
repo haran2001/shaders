@@ -209,17 +209,17 @@ Superellipsoid superellipsoidConstruct(vec3 pos, vec3 radius)
     vec3 axis1 = vec3(0.0, 1.0, 1.0);
     vec3 axis2 = vec3(0.0, 0.0, 1.0);
     vec3 axis = mix(axis0, mix(axis1, axis2, max(0.0, 2.0 * arg.z - 1.0)), min(1.0, 2.0 * arg.z));
-    // mat4 o = AxisAngleToMatrix(normalize(axis), deg2rad(360.0 * mod(0.05 * iTime, 1.0)));
+    mat4 o = AxisAngleToMatrix(normalize(axis), deg2rad(360.0 * mod(0.05 * iTime, 1.0)));
     
     Superellipsoid se;
     se.Center = pos;
     se.Radius = radius;
     se.Exponent = e;
-    // se.Orientation = mat3(o);
+    se.Orientation = mat3(o);
     
-    mat3 o = mat3( 1.0,  0.0,  1.0,
-                   0.0,  1.0,  1.0,
-                   0.0,  0.0,  1.0);
+    // mat3 o = mat3( 1.0,  0.0,  1.0,
+    //                0.0,  1.0,  1.0,
+    //                0.0,  0.0,  1.0);
     // se.Orientation = mat3(o);
 
     return(se);
@@ -570,68 +570,70 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     bool isIntersect = superellipsoidIntersect(se, ray, 1.0e-06, ipoint, normal);
     if(isIntersect)
     {
-        float gc = superellipsoidGaussianCurvature(se, ipoint);
-        vec3 albedo = plasmaQuintic(infinite2Unit(gc));
+        // float gc = superellipsoidGaussianCurvature(se, ipoint);
+        // vec3 albedo = plasmaQuintic(infinite2Unit(gc));
 
         // account sun lighting 
         vec3 brightness = calculateLighting(sun.Color, sun.Direction, -ray.Direction, normal, 1.0, 0.25, 128.0);
 
-        Ray ray2 = Ray(ipoint, reflect(ray.Direction, normal));
-        vec3 ipoint2 = vec3(0.0);
-        vec3 normal2 = vec3(0.0);
+        // Ray ray2 = Ray(ipoint, reflect(ray.Direction, normal));
+        // vec3 ipoint2 = vec3(0.0);
+        // vec3 normal2 = vec3(0.0);
 
         // account sky plane lighting 
-        isIntersect = planeIntersect(spl, ray2, ipoint2, normal2);
-        if(isIntersect)
-        {
-            brightness += calculateLighting(SKYColor, -spl.Normal, ray2.Direction, normal, 1.0, 0.25, 32.0);
-        }
+        // isIntersect = planeIntersect(spl, ray2, ipoint2, normal2);
+        // if(isIntersect)
+        // {
+        //     brightness += calculateLighting(SKYColor, -spl.Normal, ray2.Direction, normal, 1.0, 0.25, 32.0);
+        // }
 
         // account ground plane lighting (used fake ground colour)
-        isIntersect = planeIntersect(gpl, ray2, ipoint2, normal2);
-        if(isIntersect)
-        {
-            float f = mod(floor(6.0 * ipoint2.z) + floor(6.0 * ipoint2.x), 2.0);
-            vec3 GNDColor = 0.4 + f * vec3(0.6);
-            brightness += calculateLighting(SKYColor * GNDColor, -gpl.Normal, ray2.Direction, normal, 1.0, 0.25, 32.0);
-        }
+        // isIntersect = planeIntersect(gpl, ray2, ipoint2, normal2);
+        // if(isIntersect)
+        // {
+        //     float f = mod(floor(6.0 * ipoint2.z) + floor(6.0 * ipoint2.x), 2.0);
+        //     vec3 GNDColor = 0.4 + f * vec3(0.6);
+        //     brightness += calculateLighting(SKYColor * GNDColor, -gpl.Normal, ray2.Direction, normal, 1.0, 0.25, 32.0);
+        // }
 
-        color = albedo * brightness;
+        // color = albedo * brightness;
+        color = brightness;
     }
-    else
-    {
-        //ray vs ground plane
-        isIntersect = planeIntersect(gpl, ray, ipoint, normal);
-        if(isIntersect)
-        {
-            // account sun lighting 
-            vec3 brightness = calculateLighting(sun.Color, sun.Direction, -ray.Direction, normal, 1.0, 0.0, 32.0);
+    // else
+    // {
+    //     //ray vs ground plane
+    //     isIntersect = planeIntersect(gpl, ray, ipoint, normal);
+    //     if(isIntersect)
+    //     {
+    //         // account sun lighting 
+    //         vec3 brightness = calculateLighting(sun.Color, sun.Direction, -ray.Direction, normal, 1.0, 0.0, 32.0);
 
-            // account sky plane lighting 
-            brightness += calculateLighting(SKYColor, -spl.Normal, -ray.Direction, normal, 1.0, 0.0, 32.0);
+    //         // account sky plane lighting 
+    //         brightness += calculateLighting(SKYColor, -spl.Normal, -ray.Direction, normal, 1.0, 0.0, 32.0);
 
-            // calculate albedo of ground plane
-            float f = mod(floor(6.0 * ipoint.z) + floor(6.0 * ipoint.x), 2.0);
-            vec3 albedo = 0.4 + f * vec3(0.6);
+    //         // calculate albedo of ground plane
+    //         float f = mod(floor(6.0 * ipoint.z) + floor(6.0 * ipoint.x), 2.0);
+    //         vec3 albedo = 0.4 + f * vec3(0.6);
 
-            color = albedo * brightness;
+    //         color = albedo * brightness;
 
-            // shadow
-            float attenuation = calcShadowAttenuation(ipoint, sun, se);
-            color *= attenuation;
-        }
-    }
+    //         // shadow
+    //         float attenuation = calcShadowAttenuation(ipoint, sun, se);
+    //         color *= attenuation;
+    //     }
+    // }
 
     // Tone mapping
-    color = ACESFilm(color);
+    // color = ACESFilm(color);
     
     // Exponential distance fog
-    float distance = length(ipoint - P);
-    color = mix(color, 0.85 * FOGColor, 1.0 - exp2(-0.0055 * distance * distance));
+    // float distance = length(ipoint - P);
+    // color = mix(color, 0.85 * FOGColor, 1.0 - exp2(-0.0055 * distance * distance));
 
     // Gamma correction
-    color = Linear2sRGB(color);
+    // color = Linear2sRGB(color);
 
-    float vignette = pow(32.0 * uv.x * uv.y * (1.0 - uv.x) * (1.0 - uv.y), 0.05);
-    fragColor = vec4(color * vignette, 1.0);
+    // float vignette = pow(32.0 * uv.x * uv.y * (1.0 - uv.x) * (1.0 - uv.y), 0.05);
+    // fragColor = vec4(color * vignette, 1.0);
+    fragColor = vec4(color , 1.0);
 }

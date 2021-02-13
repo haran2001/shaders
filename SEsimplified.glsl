@@ -97,12 +97,13 @@ Superellipsoid superellipsoidConstruct(vec3 pos, vec3 radius)
     
     //e determines nature of shape (exponent for superquad)
     // vec2 e = mix(vec2(0.1), vec2(2.0), arg.xy);
-    vec2 e = vec2(1.5);
+    vec2 e = vec2(0.1);
     
     vec3 axis0 = vec3(1.0, 0.0, 0.0);
-    vec3 axis1 = vec3(0.0, 1.0, 1.0);
+    vec3 axis1 = vec3(-1.0, 1.0, 1.0);
     vec3 axis2 = vec3(0.0, 0.0, 1.0);
-    vec3 axis = mix(axis0, mix(axis1, axis2, max(0.0, 2.0 * arg.z - 1.0)), min(1.0, 2.0 * arg.z));
+    // vec3 axis = mix(axis0, mix(axis1, axis2, max(0.0, 2.0 * arg.z - 1.0)), min(1.0, 2.0 * arg.z));
+    vec3 axis = axis1;
     // mat4 o = AxisAngleToMatrix(normalize(axis), deg2rad(360.0 * mod(0.0 * iTime, 1.0)));
     mat4 o = AxisAngleToMatrix(normalize(axis), deg2rad(180.0));
     
